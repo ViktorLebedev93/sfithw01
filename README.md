@@ -28,6 +28,10 @@
 
 **Скриншоты с настройками **
 <img src="img/img1.jpg">
+<img src="img/img2.jpg">
+<img src="img/img3.jpg">
+<img src="img/img4.jpg">
+<img src="img/img5.jpg">
 
 <a href="hsrp_advanced.pkt">Приложенный PKT файл</a>
 
@@ -52,7 +56,7 @@
 ```
 **4. Скриншот с демонстрацией **
 
-<img src="img/img2.jpg">
+<img src="img/img6.jpg">
 
 **5. Файл keepalived **
 
