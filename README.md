@@ -122,6 +122,8 @@ vrrp_instance VI_1 {
 }
 ```
 **5. Скриншоты с демонстрацией **
+
+
 <img src="img/img6.jpg">
 <img src="img/img7.jpg">
 
