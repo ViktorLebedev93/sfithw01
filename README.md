@@ -46,18 +46,85 @@
 5. `На проверку отправьте получившейся bash-скрипт и конфигурационный файл keepalived, а также скриншот с демонстрацией переезда плавающего ip на другой сервер в случае недоступности порта или файла index.html`
 
 ### Решение 2
-**1. Создаем скрипт**
+**1. Устанавливаем keepalived и запускаем http сервер на обоих нодах **
 ```
+sudo apt install keepalived
+python3 -m http.server 80 --bind 0.0.0.0
 
 ```
-**2. Код скрипта**
+**2. Создаем скрипт проверки доступности сервера**
 ```
+#!/bin/bash
 
+WEB_PORT=80
+WEB_ROOT="/home/viktor/http"
+INDEX_FILE="index.html"
+
+nc -z localhost $WEB_PORT
+if [ $? -ne 0 ]; then
+  echo "Port $WEB_PORT is down!"
+  exit 1
+fi
+
+if [ ! -f "$WEB_ROOT/$INDEX_FILE" ]; then
+  echo "$WEB_ROOT/$INDEX_FILE not exist!"
+  exit 1
+fi
+
+exit 0
 ```
-**4. Скриншот с демонстрацией **
+**3. Создаем keepalived.conf (нода1)**
+```
+vrrp_script chk_webserver {
+    script "/home/viktor/checkserver.sh"
+    interval 3
+    weight 2
+    fall 2
+    rise 2
+}
 
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens160 
+    virtual_router_id 209
+    priority 255
+    advert_int 1
+    virtual_ipaddress {
+        10.1.170.209
+    }
+    track_script {
+        chk_webserver
+    }
+}
+```
+**4. Создаем keepalived.conf (нода2)**
+```
+vrrp_script chk_webserver {
+    script "/home/viktor/checkserver.sh"
+    interval 3
+    weight 2
+    fall 2
+    rise 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens160
+    virtual_router_id 209
+    priority 100
+    advert_int 1
+    virtual_ipaddress {
+        10.1.170.209
+    }
+    track_script {
+        chk_webserver
+    }
+}
+```
+**5. Скриншоты с демонстрацией **
+
+Обращаемся по виртуальному IP 
 <img src="img/img6.jpg">
+Останавливаем веб сервер на первой ноде. Обращаемся по виртуальному IP и видим что происходит обращение ко второй.
+<img src="img/img7.jpg">
 
-**5. Файл keepalived **
-
-<a href="keepalived">keepalived</a>
